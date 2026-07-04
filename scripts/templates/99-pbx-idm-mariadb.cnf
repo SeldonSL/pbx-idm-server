@@ -1,0 +1,4 @@
+# Tuning para servidor de 4GB compartido (FreePBX + Kanidm + host)
+[mysqld]
+innodb_buffer_pool_size = 256M
+performance_schema = OFF

@@ -1,0 +1,17 @@
+# server.toml de Kanidm — generado por provision-kanidm.sh (@FQDN@ se sustituye)
+version = "2"
+
+bindaddress = "[::]:8443"
+db_path = "/data/kanidm.db"
+
+tls_chain = "/data/tls/fullchain.pem"
+tls_key = "/data/tls/key.pem"
+
+# ATENCION: domain es una decision PERMANENTE (dificil de cambiar despues).
+domain = "@FQDN@"
+origin = "https://@FQDN@:8443"
+
+[online_backup]
+path = "/data/backups/"
+schedule = "00 22 * * *"
+versions = 7

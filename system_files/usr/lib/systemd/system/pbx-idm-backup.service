@@ -1,0 +1,8 @@
+[Unit]
+Description=Consolidacion nocturna de backups (FreePBX, Kanidm, configuracion)
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=idle
+ExecStart=/usr/libexec/pbx-idm/backup.sh

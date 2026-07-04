@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone target="DROP">
+  <short>lan</short>
+  <description>LAN local: solo telefonia (SIP/RTP) para telefonos IP de la sede, y trafico directo de Tailscale. Sin acceso administrativo.</description>
+  <port protocol="udp" port="5060"/>
+  <port protocol="tcp" port="5060"/>
+  <port protocol="udp" port="10000-20000"/>
+  <port protocol="udp" port="41641"/>
+</zone>

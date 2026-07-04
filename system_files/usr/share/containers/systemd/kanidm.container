@@ -1,0 +1,26 @@
+[Unit]
+Description=Kanidm identity server
+Wants=network-online.target
+After=network-online.target tailscale-cert.service
+# No arranca hasta que la provision dia-1 haya creado config y certificado TLS
+ConditionPathExists=/var/lib/kanidm/data/server.toml
+ConditionPathExists=/var/lib/kanidm/data/tls/fullchain.pem
+
+[Container]
+# Tag EXACTO fijado a proposito: los saltos de version se hacen editando este
+# archivo en git (asi un rollback del SO tambien revierte la version de kanidm).
+# AutoUpdate=registry solo re-despliega rebuilds del MISMO tag (parches de base).
+Image=docker.io/kanidm/server:1.10.4
+ContainerName=kanidm
+AutoUpdate=registry
+PublishPort=8443:8443
+Volume=/var/lib/kanidm/data:/data:Z
+
+[Service]
+Restart=on-failure
+RestartSec=5
+MemoryHigh=300M
+MemoryMax=400M
+
+[Install]
+WantedBy=multi-user.target

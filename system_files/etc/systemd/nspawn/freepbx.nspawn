@@ -1,0 +1,20 @@
+# Contenedor de sistema FreePBX (Debian 12 + instalador oficial de Sangoma).
+# El rootfs se crea el dia-1 con scripts/provision-freepbx.sh en /var/lib/machines/freepbx.
+# Este archivo vive en /etc/systemd/nspawn (ubicacion confiable: las opciones
+# privilegiadas como Bind= si se respetan).
+
+[Exec]
+Boot=on
+PrivateUsers=no
+ResolvConf=replace-host
+Timezone=copy
+
+[Network]
+# RED DEL HOST (sin NAT ni veth): Asterisk bindea SIP/RTP directo en las
+# interfaces del host y el firewalld del host filtra. Evita el clasico
+# problema de audio unidireccional detras de NAT.
+VirtualEthernet=no
+
+[Files]
+# Los backups del modulo Backup de FreePBX caen directo al arbol del host
+Bind=/var/backups/pbx-idm/freepbx:/var/backups/host

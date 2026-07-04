@@ -1,0 +1,10 @@
+[Unit]
+Description=Renueva el certificado TLS de Tailscale y lo sincroniza al volumen de Kanidm
+After=tailscaled.service network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/pbx-idm/env
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/pbx-idm/env
+ExecStart=/usr/libexec/pbx-idm/tailscale-cert-sync.sh

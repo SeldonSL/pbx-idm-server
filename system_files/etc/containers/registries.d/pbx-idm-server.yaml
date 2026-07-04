@@ -1,0 +1,3 @@
+docker:
+  ghcr.io/seldonsl/pbx-idm-server:
+    use-sigstore-attachments: true

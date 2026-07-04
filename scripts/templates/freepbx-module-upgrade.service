@@ -1,0 +1,7 @@
+[Unit]
+Description=Actualiza los modulos de FreePBX (fwconsole ma upgradeall)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/fwconsole ma upgradeall
+ExecStartPost=/usr/sbin/fwconsole reload

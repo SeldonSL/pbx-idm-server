@@ -1,0 +1,80 @@
+# Configuracion de instalacion (Butane -> Ignition) para el servidor pbx-idm.
+#
+# ANTES DE COMPILAR: reemplazar REEMPLAZAR_HASH por el hash de la contraseña
+# de rescate (ver installer/README.md). El .ign resultante NO se commitea.
+#
+# Compilar:
+#   podman run -i --rm quay.io/coreos/butane:release --pretty --strict \
+#     < installer/pbx-idm.butane > pbx-idm.ign
+#
+# Flujo: se instala Fedora CoreOS vanilla con este ignition; en el primer
+# arranque el sistema se convierte solo (dos reinicios) a nuestra imagen:
+#   etapa 1: rebase sin verificar -> trae policy.json + clave publica de firma
+#   etapa 2: rebase FIRMADO -> desde aqui todo update verifica la firma cosign
+
+variant: fcos
+version: 1.5.0
+
+passwd:
+  users:
+    - name: core
+      groups:
+        - wheel
+      ssh_authorized_keys:
+        - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMEL7U3N6RDuakJQZRLO15BmJ9P6aP2qOwqBR8KmVMvB blackquiltro@proton.me"
+      # Solo para consola fisica de rescate (SSH por contraseña esta deshabilitado)
+      password_hash: "REEMPLAZAR_HASH"
+
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: pbx-idm
+    - path: /etc/pbx-idm/env
+      mode: 0644
+      contents:
+        inline: |
+          # Se rellena con el FQDN real al correr scripts/provision-tailscale.sh
+          TS_FQDN=PENDIENTE
+
+systemd:
+  units:
+    - name: pbx-idm-autorebase-unsigned.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Etapa 1: rebase (sin verificar) a la imagen pbx-idm-server
+        ConditionPathExists=!/etc/pbx-idm-autorebase/unsigned-done
+        ConditionPathExists=!/etc/pbx-idm-autorebase/signed-done
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        StandardOutput=journal+console
+        ExecStart=/usr/bin/mkdir -p /etc/pbx-idm-autorebase
+        ExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-unverified-registry:ghcr.io/seldonsl/pbx-idm-server:stable
+        ExecStart=/usr/bin/touch /etc/pbx-idm-autorebase/unsigned-done
+        ExecStart=/usr/bin/systemctl disable pbx-idm-autorebase-unsigned.service
+        ExecStart=/usr/bin/systemctl reboot
+        [Install]
+        WantedBy=multi-user.target
+    - name: pbx-idm-autorebase-signed.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Etapa 2: rebase FIRMADO a la imagen pbx-idm-server
+        ConditionPathExists=/etc/pbx-idm-autorebase/unsigned-done
+        ConditionPathExists=!/etc/pbx-idm-autorebase/signed-done
+        After=network-online.target
+        Wants=network-online.target
+        [Service]
+        Type=oneshot
+        StandardOutput=journal+console
+        ExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-image-signed:docker://ghcr.io/seldonsl/pbx-idm-server:stable
+        ExecStart=/usr/bin/touch /etc/pbx-idm-autorebase/signed-done
+        ExecStart=/usr/bin/systemctl disable pbx-idm-autorebase-signed.service
+        ExecStart=/usr/bin/systemctl reboot
+        [Install]
+        WantedBy=multi-user.target

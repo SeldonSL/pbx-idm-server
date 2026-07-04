@@ -1,0 +1,17 @@
+{
+  "default": [{ "type": "insecureAcceptAnything" }],
+  "transports": {
+    "docker": {
+      "ghcr.io/seldonsl/pbx-idm-server": [
+        {
+          "type": "sigstoreSigned",
+          "keyPath": "/etc/pki/containers/pbx-idm-server.pub",
+          "signedIdentity": { "type": "matchRepository" }
+        }
+      ]
+    },
+    "docker-daemon": {
+      "": [{ "type": "insecureAcceptAnything" }]
+    }
+  }
+}

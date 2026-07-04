@@ -1,0 +1,78 @@
+name: build-pbx-idm-server
+
+on:
+  schedule:
+    # 01:00 UTC ≈ 22:00 America/Santiago — el servidor aplica updates a las 04:00 locales
+    - cron: "0 1 * * *"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - "scripts/**"
+      - "installer/**"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: pbx-idm-server
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  DEFAULT_TAG: stable
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generar tags
+        id: meta
+        run: |
+          echo "date_tag=stable-$(date +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          echo "sha_tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Construir imagen
+        id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          containerfiles: ./Containerfile
+          image: ${{ env.IMAGE_NAME }}
+          tags: |
+            ${{ env.DEFAULT_TAG }}
+            ${{ steps.meta.outputs.date_tag }}
+            ${{ steps.meta.outputs.sha_tag }}
+
+      - name: Login en GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publicar imagen
+        id: push
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+
+      - name: Instalar cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Firmar imagen
+        run: |
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY \
+            "${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}"
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          COSIGN_PASSWORD: ""
+          DIGEST: ${{ steps.push.outputs.digest }}

@@ -1,0 +1,5 @@
+# Clave PRIVADA de firma — jamás se commitea (vive en GitHub Secrets + gestor de contraseñas)
+cosign.key
+
+# Archivos ignition compilados (contienen hash de contraseña y clave SSH)
+*.ign
