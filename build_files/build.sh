@@ -4,10 +4,20 @@ set -euxo pipefail
 # Paquetes sobre ucore-minimal:
 #  - systemd-container: machinectl + systemd-nspawn (contenedor de sistema FreePBX)
 #  - jq: usado por los scripts de operación
+#  - cockpit-*: panel de monitoreo web (ucore-minimal NO lo trae; activado por
+#    socket, solo consume recursos al usarlo)
+PACKAGES=(
+    systemd-container
+    jq
+    cockpit-ws
+    cockpit-system
+    cockpit-podman
+    cockpit-networkmanager
+)
 if command -v dnf5 >/dev/null 2>&1; then
-    dnf5 install -y systemd-container jq
+    dnf5 install -y "${PACKAGES[@]}"
 else
-    rpm-ostree install systemd-container jq
+    rpm-ostree install "${PACKAGES[@]}"
 fi
 
 # Hora local del servidor: los OnCalendar de todos los timers son hora local
