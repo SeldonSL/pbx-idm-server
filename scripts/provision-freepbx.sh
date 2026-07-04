@@ -53,20 +53,30 @@ done
 machinectl list
 
 echo "== 5/8 Instalador oficial FreePBX 17 (30-60 min — NO interrumpir) =="
+# El instalador deja los demonios (asterisk, fwconsole) corriendo en su propia
+# sesion: hay que detenerlos para que systemd-run pueda retornar. Arrancan
+# limpios via freepbx.service tras el reinicio del paso 7.
 systemd-run --machine=freepbx --pipe --wait /bin/bash -c \
-    'curl -fLo /tmp/inst.sh https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh && bash /tmp/inst.sh'
+    'curl -fLo /tmp/inst.sh https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh && bash /tmp/inst.sh; rc=$?; fwconsole stop --immediate >/dev/null 2>&1 || true; exit $rc'
 
-echo "== 6/8 Tuning MariaDB para 4GB =="
+echo "== 6/8 Tuning MariaDB y updates internos (solo archivos) =="
 cp "$TEMPLATES/99-pbx-idm-mariadb.cnf" "$MACHINE/etc/mysql/mariadb.conf.d/99-pbx-idm.cnf"
-systemd-run --machine=freepbx --pipe --wait systemctl restart mariadb
-
-echo "== 7/8 Updates automaticos internos (apt + modulos FreePBX) =="
 cp "$TEMPLATES/52-pbx-idm-unattended.conf" "$MACHINE/etc/apt/apt.conf.d/"
 cp "$TEMPLATES/freepbx-module-upgrade.service" "$MACHINE/etc/systemd/system/"
 cp "$TEMPLATES/freepbx-module-upgrade.timer" "$MACHINE/etc/systemd/system/"
+
+echo "== 7/8 Reinicio limpio de la maquina =="
+machinectl reboot freepbx
+for i in $(seq 1 60); do
+    systemd-run --machine=freepbx --pipe --wait /bin/true >/dev/null 2>&1 && break
+    [ "$i" -eq 60 ] && { echo "ERROR: la maquina no volvio tras el reboot"; exit 1; }
+    sleep 3
+done
 systemd-run --machine=freepbx --pipe --wait systemctl enable --now freepbx-module-upgrade.timer
 
-echo "== 8/8 Listo =="
+echo "== 8/8 Verificacion =="
+systemd-run --machine=freepbx --pipe --wait /bin/bash -c \
+    'sleep 15; systemctl is-active freepbx mariadb apache2 freepbx-module-upgrade.timer'
 cat <<'FIN'
 
 PASOS MANUALES EN LA GUI (http://<fqdn-tailscale> desde un equipo en la tailnet):
