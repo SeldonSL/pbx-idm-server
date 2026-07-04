@@ -41,7 +41,13 @@ echo "== 4/8 Arrancando la maquina =="
 mkdir -p /var/backups/pbx-idm/freepbx
 machinectl enable freepbx
 machinectl start freepbx
-sleep 10
+# Esperar a que el systemd interno este listo (un sleep fijo genera carreras)
+echo "   esperando a que la maquina responda..."
+for i in $(seq 1 60); do
+    systemd-run --machine=freepbx --pipe --wait /bin/true >/dev/null 2>&1 && break
+    [ "$i" -eq 60 ] && { echo "ERROR: la maquina freepbx no respondio en 120s"; exit 1; }
+    sleep 2
+done
 machinectl list
 
 echo "== 5/8 Instalador oficial FreePBX 17 (30-60 min — NO interrumpir) =="
