@@ -1,5 +1,5 @@
 {
-  "default": [{ "type": "insecureAcceptAnything" }],
+  "default": [{ "type": "reject" }],
   "transports": {
     "docker": {
       "ghcr.io/seldonsl/pbx-idm-server": [
@@ -8,10 +8,15 @@
           "keyPath": "/etc/pki/containers/pbx-idm-server.pub",
           "signedIdentity": { "type": "matchRepository" }
         }
-      ]
-    },
-    "docker-daemon": {
+      ],
       "": [{ "type": "insecureAcceptAnything" }]
-    }
+    },
+    "docker-daemon": { "": [{ "type": "insecureAcceptAnything" }] },
+    "containers-storage": { "": [{ "type": "insecureAcceptAnything" }] },
+    "dir": { "": [{ "type": "insecureAcceptAnything" }] },
+    "oci": { "": [{ "type": "insecureAcceptAnything" }] },
+    "oci-archive": { "": [{ "type": "insecureAcceptAnything" }] },
+    "docker-archive": { "": [{ "type": "insecureAcceptAnything" }] },
+    "tarball": { "": [{ "type": "insecureAcceptAnything" }] }
   }
 }

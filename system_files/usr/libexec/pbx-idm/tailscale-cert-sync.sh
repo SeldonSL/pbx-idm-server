@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TS_FQDN viene de /etc/pbx-idm/env (EnvironmentFile del service)
-: "${TS_FQDN:?falta TS_FQDN en /etc/pbx-idm/env}"
+# TS_FQDN viene de /etc/pbx-idm/env (EnvironmentFile del service).
+# Antes de correr provision-tailscale.sh vale "PENDIENTE": no es un error,
+# simplemente aun no hay nada que renovar.
+if [ "${TS_FQDN:-PENDIENTE}" = "PENDIENTE" ]; then
+    echo "TS_FQDN aun no configurado (corre provision-tailscale.sh); nada que hacer."
+    exit 0
+fi
 
 DEST=/var/lib/kanidm/data/tls
 install -d -m 0755 "$DEST"
