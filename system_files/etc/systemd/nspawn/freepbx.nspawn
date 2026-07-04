@@ -16,5 +16,6 @@ Timezone=copy
 VirtualEthernet=no
 
 [Files]
-# Los backups del modulo Backup de FreePBX caen directo al arbol del host
-Bind=/var/backups/pbx-idm/freepbx:/var/backups/host
+# La ruta DEFAULT del modulo Backup de FreePBX apunta directo al arbol de
+# backups del host: el job de la GUI funciona sin configurar Filestore.
+Bind=/var/backups/pbx-idm/freepbx:/var/spool/asterisk/backup

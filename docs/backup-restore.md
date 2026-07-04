@@ -15,7 +15,8 @@ Rotación: 14 días. **Canario**: si un día no aparece backup nuevo, algo está
 ### FreePBX (en un nspawn recién provisionado)
 ```bash
 sudo machinectl shell freepbx
-fwconsole backup --restore /var/backups/host/<archivo>.tar.gz
+# los backups del host se ven dentro en /var/spool/asterisk/backup/
+fwconsole backup --restore /var/spool/asterisk/backup/nightly-local/<archivo>.tar.gz
 fwconsole reload
 ```
 

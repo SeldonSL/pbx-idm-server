@@ -87,7 +87,8 @@ PASOS MANUALES EN LA GUI (http://<fqdn-tailscale> desde un equipo en la tailnet)
  2. Settings -> Asterisk SIP Settings:
       Local Networks: 100.64.0.0/10 + LAN sede A + LAN sede B
       RTP Port Ranges: 10000-20000
- 3. Modulo Backup: job nocturno 01:30 -> storage Local -> directorio /var/backups/host
+ 3. Modulo Backup: job nocturno 01:30 (almacenamiento Local por defecto:
+    ya aterriza en /var/backups/pbx-idm/freepbx del host via bind mount)
  4. Crear extensiones y probar llamada entre dos softphones.
 
 NOTA fase 4 del plan: verificar el origen real del repo Sangoma para unattended-upgrades:
