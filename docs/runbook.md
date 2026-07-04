@@ -3,7 +3,7 @@
 ## Acceso normal
 
 - SSH: `ssh core@pbx-idm.<tailnet>.ts.net` (solo desde equipos en la tailnet)
-- FreePBX: `http://pbx-idm.<tailnet>.ts.net` · Kanidm: `https://...:8443` · Cockpit: `https://...:9090`
+- FreePBX: `https://pbx-idm.<tailnet>.ts.net` · Kanidm: `https://...:8443` · Cockpit: `https://...:9090`
 
 ## Cambiar configuración del sistema
 

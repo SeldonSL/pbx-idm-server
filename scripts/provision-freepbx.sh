@@ -74,9 +74,12 @@ for i in $(seq 1 60); do
 done
 systemd-run --machine=freepbx --pipe --wait systemctl enable --now freepbx-module-upgrade.timer
 
-echo "== 8/8 Verificacion =="
+echo "== 8/8 Verificacion y HTTPS =="
 systemd-run --machine=freepbx --pipe --wait /bin/bash -c \
     'sleep 15; systemctl is-active freepbx mariadb apache2 freepbx-module-upgrade.timer'
+# GUI con HTTPS real (cert automatico de Tailscale, candado en el navegador).
+# El trafico http:80 ya viajaba cifrado por el tunel, pero asi el navegador lo sabe.
+tailscale serve --bg --https=443 http://127.0.0.1:80
 cat <<'FIN'
 
 PASOS MANUALES EN LA GUI (http://<fqdn-tailscale> desde un equipo en la tailnet):

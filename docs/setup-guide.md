@@ -77,6 +77,6 @@ consola física (secreto #3) siempre funciona.
 
 ## URLs finales (desde cualquier equipo tuyo con Tailscale)
 
-- FreePBX: `http://pbx-idm.<tu-tailnet>.ts.net`
+- FreePBX: `https://pbx-idm.<tu-tailnet>.ts.net` (GUI con candado vía tailscale serve)
 - Kanidm: `https://pbx-idm.<tu-tailnet>.ts.net:8443`
 - Cockpit (monitoreo): `https://pbx-idm.<tu-tailnet>.ts.net:9090`
