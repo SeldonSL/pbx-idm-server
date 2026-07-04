@@ -32,7 +32,9 @@ echo "== 3/8 Preparacion offline del rootfs =="
 # ademas el registro en machined falla si el script corre como servicio.
 systemd-nspawn --register=no -D "$MACHINE" --pipe /bin/bash <<'EOF'
 set -e
-echo freepbx > /etc/hostname
+# El instalador de Sangoma exige un FQDN (nombre con puntos) en hostname y hosts
+echo freepbx.internal > /etc/hostname
+echo "127.0.1.1 freepbx.internal freepbx" >> /etc/hosts
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y dbus curl wget gnupg2 sudo locales unattended-upgrades
 EOF
