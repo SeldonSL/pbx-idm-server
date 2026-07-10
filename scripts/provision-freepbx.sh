@@ -63,6 +63,10 @@ systemd-run --machine=freepbx --pipe --wait /bin/bash -c \
     'curl -fLo /tmp/inst.sh https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh && bash /tmp/inst.sh; rc=$?; fwconsole stop --immediate >/dev/null 2>&1 || true; exit $rc'
 
 echo "== 6/8 Tuning MariaDB y updates internos (solo archivos) =="
+# Apache trae "Listen 443" de fabrica sin ningun sitio detras. Con la red
+# compartida choca con tailscale serve (443) segun quien arranque primero,
+# y si a Apache le falla UN puerto no abre NINGUNO (la GUI muere entera).
+sed -i 's/^\([[:space:]]*\)Listen 443$/\1#Listen 443/' "$MACHINE/etc/apache2/ports.conf"
 cp "$TEMPLATES/99-pbx-idm-mariadb.cnf" "$MACHINE/etc/mysql/mariadb.conf.d/99-pbx-idm.cnf"
 cp "$TEMPLATES/52-pbx-idm-unattended.conf" "$MACHINE/etc/apt/apt.conf.d/"
 cp "$TEMPLATES/freepbx-module-upgrade.service" "$MACHINE/etc/systemd/system/"
