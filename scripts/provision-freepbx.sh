@@ -28,6 +28,9 @@ semanage fcontext -a -t container_file_t "/var/lib/machines(/.*)?" 2>/dev/null |
 restorecon -R /var/lib/machines
 
 echo "== 3/8 Preparacion offline del rootfs =="
+# freepbx.nspawn (en la imagen) bindea /var/backups/pbx-idm/freepbx en CADA
+# arranque de la maquina, incluido este efimero: la carpeta debe existir ya.
+mkdir -p /var/backups/pbx-idm/freepbx
 # --register=no: este es un comando efimero de preparacion, no la maquina real;
 # ademas el registro en machined falla si el script corre como servicio.
 systemd-nspawn --register=no -D "$MACHINE" --pipe /bin/bash <<'EOF'
